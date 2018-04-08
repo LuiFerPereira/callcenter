@@ -1,0 +1,126 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: DefaultEstrategiaAtenderLlamadas</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.almundo.callcenter.dominio</a> ]
+</div>
+
+<h1>Coverage Summary for Class: DefaultEstrategiaAtenderLlamadas (com.almundo.callcenter.dominio)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultEstrategiaAtenderLlamadas</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/ 17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.almundo.callcenter.dominio;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.apache.commons.lang3.Validate;
+<i>4</i>&nbsp;import org.slf4j.Logger;
+<i>5</i>&nbsp;import org.slf4j.LoggerFactory;
+<i>6</i>&nbsp;
+<i>7</i>&nbsp;import java.util.Collection;
+<i>8</i>&nbsp;import java.util.List;
+<i>9</i>&nbsp;import java.util.Optional;
+<i>10</i>&nbsp;import java.util.stream.Collectors;
+<i>11</i>&nbsp;
+<b class="fc"><i>12</i>&nbsp;public class DefaultEstrategiaAtenderLlamadas implements EstrategiaAtenderLlamadas {</b>
+<i>13</i>&nbsp;
+<b class="fc"><i>14</i>&nbsp;    private static final Logger logger = LoggerFactory.getLogger(DefaultEstrategiaAtenderLlamadas.class);</b>
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;    /**
+<i>17</i>&nbsp;     * Busca el empleado disponible de acuerdo a la estrategia:
+<i>18</i>&nbsp;     * primero atienden los operadores disponibles, luego los supervisores disponibles y luego el director.
+<i>19</i>&nbsp;     * @param EmpleadoList: Lista de empleados del CallCenter
+<i>20</i>&nbsp;     * @return retorna empleado disponible. Si no hay disponible, retorna Null
+<i>21</i>&nbsp;     */
+<i>22</i>&nbsp;    @Override
+<i>23</i>&nbsp;    public Empleado findEmpleado(Collection&lt;Empleado&gt; EmpleadoList) {
+<b class="fc"><i>24</i>&nbsp;        Validate.notNull(EmpleadoList);</b>
+<b class="fc"><i>25</i>&nbsp;        List&lt;Empleado&gt; empleadosDisponibles = EmpleadoList.stream().filter(e -&gt; e.getEstadoEmpleado() == EstadoEmpleado.DISPONIBLE).collect(Collectors.toList());</b>
+<b class="fc"><i>26</i>&nbsp;        logger.info(&quot;Empleados Disponibles: &quot; + empleadosDisponibles.size());</b>
+<b class="fc"><i>27</i>&nbsp;        Optional&lt;Empleado&gt; Empleado = empleadosDisponibles.stream().filter(e -&gt; e.getTipoEmpleado() == TipoEmpleado.OPERADOR).findAny();</b>
+<b class="fc"><i>28</i>&nbsp;        if (!Empleado.isPresent()) {</b>
+<b class="fc"><i>29</i>&nbsp;            logger.info(&quot;No operadores disponibles encontrados&quot;);</b>
+<b class="fc"><i>30</i>&nbsp;            Empleado = empleadosDisponibles.stream().filter(e -&gt; e.getTipoEmpleado() == TipoEmpleado.SUPERVISOR).findAny();</b>
+<b class="fc"><i>31</i>&nbsp;            if (!Empleado.isPresent()) {</b>
+<b class="fc"><i>32</i>&nbsp;                logger.info(&quot;No supervisors disponibles encontrados&quot;);</b>
+<b class="fc"><i>33</i>&nbsp;                Empleado = empleadosDisponibles.stream().filter(e -&gt; e.getTipoEmpleado() == TipoEmpleado.DIRECTOR).findAny();</b>
+<b class="fc"><i>34</i>&nbsp;                if (!Empleado.isPresent()) {</b>
+<b class="fc"><i>35</i>&nbsp;                    logger.info(&quot;No directores disponibles encontrados&quot;);</b>
+<b class="fc"><i>36</i>&nbsp;                    return null;</b>
+<i>37</i>&nbsp;                }
+<i>38</i>&nbsp;            }
+<i>39</i>&nbsp;        }
+<b class="fc"><i>40</i>&nbsp;        logger.info(&quot;Empleado de tipo &quot; + Empleado.get().getTipoEmpleado() + &quot; encontrados&quot;);</b>
+<b class="fc"><i>41</i>&nbsp;        return Empleado.get();</b>
+<i>42</i>&nbsp;    }
+<i>43</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2018-04-08 16:36</div>
+</div>
+</body>
+</html>

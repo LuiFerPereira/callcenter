@@ -1,0 +1,181 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Dispatcher</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.almundo.callcenter.dominio</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Dispatcher (com.almundo.callcenter.dominio)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Dispatcher</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/ 8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,9%
+  </span>
+  <span class="absValue">
+    (30/ 38)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.almundo.callcenter.dominio;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.apache.commons.lang3.Validate;
+<i>4</i>&nbsp;import org.slf4j.Logger;
+<i>5</i>&nbsp;import org.slf4j.LoggerFactory;
+<i>6</i>&nbsp;
+<i>7</i>&nbsp;import java.util.List;
+<i>8</i>&nbsp;import java.util.concurrent.ConcurrentLinkedDeque;
+<i>9</i>&nbsp;import java.util.concurrent.ExecutorService;
+<i>10</i>&nbsp;import java.util.concurrent.Executors;
+<i>11</i>&nbsp;
+<i>12</i>&nbsp;public class Dispatcher implements Runnable {
+<i>13</i>&nbsp;
+<b class="fc"><i>14</i>&nbsp;    private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class);</b>
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;    /**
+<i>17</i>&nbsp;     * Capacidad del Call Center para atender llamadas
+<i>18</i>&nbsp;     */
+<b class="fc"><i>19</i>&nbsp;    public static final Integer CAPACIDAD_CALL_CENTER = 10;</b>
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;    private Boolean activo;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;    private ExecutorService executorService;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;    private ConcurrentLinkedDeque&lt;Empleado&gt; Empleados;
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;    private ConcurrentLinkedDeque&lt;Llamada&gt; llamadasEntrantes;
+<i>28</i>&nbsp;
+<i>29</i>&nbsp;    private EstrategiaAtenderLlamadas estrategiaAtenderLlamadas;
+<i>30</i>&nbsp;
+<i>31</i>&nbsp;    public Dispatcher(List&lt;Empleado&gt; Empleados) {
+<b class="fc"><i>32</i>&nbsp;        this(Empleados, new DefaultEstrategiaAtenderLlamadas());</b>
+<b class="fc"><i>33</i>&nbsp;    }</b>
+<i>34</i>&nbsp;
+<b class="fc"><i>35</i>&nbsp;    public Dispatcher(List&lt;Empleado&gt; Empleados, EstrategiaAtenderLlamadas estrategiaAtenderLlamadas) {</b>
+<b class="fc"><i>36</i>&nbsp;        Validate.notNull(Empleados);</b>
+<b class="fc"><i>37</i>&nbsp;        Validate.notNull(estrategiaAtenderLlamadas);</b>
+<b class="fc"><i>38</i>&nbsp;        this.Empleados = new ConcurrentLinkedDeque(Empleados);</b>
+<b class="fc"><i>39</i>&nbsp;        this.estrategiaAtenderLlamadas = estrategiaAtenderLlamadas;</b>
+<b class="fc"><i>40</i>&nbsp;        this.llamadasEntrantes = new ConcurrentLinkedDeque&lt;&gt;();</b>
+<b class="fc"><i>41</i>&nbsp;        this.executorService = Executors.newFixedThreadPool(CAPACIDAD_CALL_CENTER);</b>
+<b class="fc"><i>42</i>&nbsp;    }</b>
+<i>43</i>&nbsp;
+<i>44</i>&nbsp;    public synchronized void dispatchCall(Llamada llamada) {
+<b class="fc"><i>45</i>&nbsp;        logger.info(&quot;Dispatch una llamada de &quot; + llamada.getDuracionEnSegundos() + &quot; segundos&quot;);</b>
+<b class="fc"><i>46</i>&nbsp;        this.llamadasEntrantes.add(llamada);</b>
+<b class="fc"><i>47</i>&nbsp;    }</b>
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    /**
+<i>50</i>&nbsp;     * Inicia el hilo Empleado y permite ejecutar el Dispatcher
+<i>51</i>&nbsp;     */
+<i>52</i>&nbsp;    public synchronized void start() {
+<b class="fc"><i>53</i>&nbsp;        this.activo = true;</b>
+<b class="fc"><i>54</i>&nbsp;        for (Empleado Empleado : this.Empleados) {</b>
+<b class="fc"><i>55</i>&nbsp;            this.executorService.execute(Empleado);</b>
+<b class="fc"><i>56</i>&nbsp;        }</b>
+<b class="fc"><i>57</i>&nbsp;    }</b>
+<i>58</i>&nbsp;
+<i>59</i>&nbsp;    /**
+<i>60</i>&nbsp;     * Detiene el hilo (thread) Empleado y el Dispatcher inmediatamente
+<i>61</i>&nbsp;     */
+<i>62</i>&nbsp;    public synchronized void stop() {
+<b class="nc"><i>63</i>&nbsp;        this.activo = false;</b>
+<b class="nc"><i>64</i>&nbsp;        this.executorService.shutdown();</b>
+<b class="nc"><i>65</i>&nbsp;    }</b>
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;    public synchronized Boolean getActivo() {
+<b class="fc"><i>68</i>&nbsp;        return activo;</b>
+<i>69</i>&nbsp;    }
+<i>70</i>&nbsp;
+<i>71</i>&nbsp;    /**
+<i>72</i>&nbsp;     * Este es el método que se ejecuta el hilo Dispatcher.
+<i>73</i>&nbsp;     * Si la cola de llamadas entrantes no está vacía, busca Empleado disponible para tomar la llamada.
+<i>74</i>&nbsp;     * Las llamadas se pondrán en cola hasta que algunos trabajadores estén disponibles
+<i>75</i>&nbsp;     */
+<i>76</i>&nbsp;    @Override
+<i>77</i>&nbsp;    public void run() {
+<b class="fc"><i>78</i>&nbsp;        while (getActivo()) {</b>
+<b class="fc"><i>79</i>&nbsp;            if (this.llamadasEntrantes.isEmpty()) {</b>
+<b class="fc"><i>80</i>&nbsp;                continue;</b>
+<i>81</i>&nbsp;            } else {
+<b class="fc"><i>82</i>&nbsp;                Empleado Empleado = this.estrategiaAtenderLlamadas.findEmpleado(this.Empleados);</b>
+<b class="fc"><i>83</i>&nbsp;                if (Empleado == null) {</b>
+<b class="nc"><i>84</i>&nbsp;                    continue;</b>
+<i>85</i>&nbsp;                }
+<b class="fc"><i>86</i>&nbsp;                Llamada call = this.llamadasEntrantes.poll();</b>
+<i>87</i>&nbsp;                try {
+<b class="fc"><i>88</i>&nbsp;                    Empleado.atenderLlamada(call);</b>
+<b class="nc"><i>89</i>&nbsp;                } catch (Exception e) {</b>
+<b class="nc"><i>90</i>&nbsp;                    logger.error(e.getMessage());</b>
+<b class="nc"><i>91</i>&nbsp;                    this.llamadasEntrantes.addFirst(call);</b>
+<b class="fc"><i>92</i>&nbsp;                }</b>
+<b class="fc"><i>93</i>&nbsp;            }</b>
+<i>94</i>&nbsp;        }
+<b class="nc"><i>95</i>&nbsp;    }</b>
+<i>96</i>&nbsp;
+<i>97</i>&nbsp;}
+<i>98</i>&nbsp;
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2018-04-08 16:36</div>
+</div>
+</body>
+</html>

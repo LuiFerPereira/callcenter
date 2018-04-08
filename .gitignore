@@ -1,0 +1,10 @@
+target/
+bin/
+callcenter.iml
+.idea
+.settings
+.project
+.classpath
+*.iml
+*.log
+*~
